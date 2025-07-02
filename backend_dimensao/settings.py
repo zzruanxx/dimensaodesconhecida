@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os # Adicione esta linha
+from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,8 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'rest_framework', 
-    'djongo',         
+    'rest_framework',       
     'api', 
 ]
 
@@ -81,19 +83,21 @@ WSGI_APPLICATION = "backend_dimensao.wsgi.application"
 
 # backend_dimensao/settings.py
 
+# The DefaultAzureCredential will automatically use the appropriate
+# authentication method based on the environment (e.g., managed identity in Azure,
+# or credentials from Azure CLI/VS Code for local development).
+# credential = DefaultAzureCredential()
+
+# key_vault_url = "https://<your-key-vault-name>.vault.azure.net/"
+# client = SecretClient(vault_url=key_vault_url, credential=credential)
+
+# Retrieve a secret from Key Vault
+# database_password = client.get_secret("YourSecretName").value
+
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'DimensaoDesconhecidaDB',
-        'CLIENT': {
-            'host': 'dimensaodesconhecidaatt.documents.azure.com',
-            'port': 10255,
-            'username': 'dimensaodesconhecidaatt',
-            'password': '82zrWfFRfinSxFwuC3f1m7wgZOyrPwOpiHLtYIxhRNbMelwlbDPKkTBTwOadhJ7ot3ilLDCJGkh8ACDbyRAkog==',
-            'ssl': True,
-            # A linha abaixo foi removida
-            # 'ssl_cert_reqs': 'CERT_NONE'
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 

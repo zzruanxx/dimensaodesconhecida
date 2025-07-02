@@ -34,3 +34,11 @@ class EpisodeDetail(APIView):
         
         serializer = EpisodeSerializer(episode)
         return Response(serializer.data)
+    
+    from django.http import HttpResponse
+from .cosmosdb_connection import criar_item
+
+def criar_novo_item(request):
+    data = {"id": "item1", "nome": "Teste"}
+    criar_item(data)
+    return HttpResponse("Item criado com sucesso!")
