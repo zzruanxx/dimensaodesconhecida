@@ -1,17 +1,26 @@
 from azure.cosmos import CosmosClient, PartitionKey
 import os
 
-COSMOS_DB_ENDPOINT = os.environ["COSMOS_DB_ENDPOINT"]
-COSMOS_DB_KEY = os.environ["COSMOS_DB_KEY"]
-DATABASE_NAME = "DimensaoDesconhecidaDB"
-CONTAINER_NAME = "Itens"
+COSMOS_DB_ENDPOINT = os.environ.get("COSMOS_DB_ENDPOINT")
+COSMOS_DB_KEY = os.environ.get("COSMOS_DB_KEY")
+COSMOS_DB_DATABASE = os.environ.get("COSMOS_DB_DATABASE")
+COSMOS_DB_CONTAINER = os.environ.get("COSMOS_DB_CONTAINER")
 
-client = CosmosClient(COSMOS_DB_ENDPOINT, credential=COSMOS_DB_KEY)
-database = client.create_database_if_not_exists(DATABASE_NAME)
-container = database.create_container_if_not_exists(
-    id=CONTAINER_NAME,
-    partition_key=PartitionKey(path="/id"),
-)
+if not all([COSMOS_DB_ENDPOINT, COSMOS_DB_KEY, COSMOS_DB_DATABASE, COSMOS_DB_CONTAINER]):
+    print(
+        "[AVISO] Uma ou mais variáveis de ambiente do Cosmos DB não estão definidas: "
+        "COSMOS_DB_ENDPOINT, COSMOS_DB_KEY, COSMOS_DB_DATABASE, COSMOS_DB_CONTAINER"
+    )
+    client = None
+    database = None
+    container = None
+else:
+    client = CosmosClient(COSMOS_DB_ENDPOINT, credential=COSMOS_DB_KEY)
+    database = client.create_database_if_not_exists(COSMOS_DB_DATABASE)
+    container = database.create_container_if_not_exists(
+        id=COSMOS_DB_CONTAINER,
+        partition_key=PartitionKey(path="/id"),
+    )
 
 def criar_item(item):
     return container.create_item(item)

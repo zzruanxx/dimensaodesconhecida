@@ -1,7 +1,7 @@
 # api/urls.py
 
 from django.urls import path
-from .views import EpisodeList, EpisodeDetail
+from .views import EpisodeList, EpisodeDetail, cosmosdb_status
 
 urlpatterns = [
     # Rota para a lista de episódios: /api/episodes/
@@ -9,4 +9,7 @@ urlpatterns = [
 
     # Rota para um episódio específico, ex: /api/episodes/1/
     path('<int:pk>/', EpisodeDetail.as_view(), name='episode-detail'),
+
+    # Rota para o endpoint de status: /api/episodes/status/
+    path('status/', cosmosdb_status),
 ]

@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Episode
 from .serializers import EpisodeSerializer
+from django.http import JsonResponse
+from .cosmosdb_connection import listar_itens, criar_item
 
 # View para listar todos os episódios ou criar um novo (não implementaremos o POST agora)
 class EpisodeList(APIView):
@@ -35,10 +37,14 @@ class EpisodeDetail(APIView):
         serializer = EpisodeSerializer(episode)
         return Response(serializer.data)
     
-    from django.http import HttpResponse
-from .cosmosdb_connection import criar_item
-
 def criar_novo_item(request):
     data = {"id": "item1", "nome": "Teste"}
     criar_item(data)
     return HttpResponse("Item criado com sucesso!")
+
+def cosmosdb_status(request):
+    try:
+        itens = listar_itens()
+        return JsonResponse({"status": "ok", "qtd_itens": len(itens)})
+    except Exception as e:
+        return JsonResponse({"status": "erro", "detalhe": str(e)}, status=500)
