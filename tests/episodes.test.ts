@@ -16,5 +16,3 @@ describe('GET /api/episodes/:id', () => {
     expect([200, 404]).toContain(res.status);
   });
 });
-  });
-});
