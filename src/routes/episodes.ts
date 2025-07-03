@@ -1,9 +1,9 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { getEpisodes, getEpisodeById, getEpisodeMedia } from '../services/episodesService';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', async (_req: Request, res: Response) => {
   try {
     const episodes = await getEpisodes();
     res.json(episodes);
@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
     const episode = await getEpisodeById(req.params.id);
     if (!episode) return res.status(404).json({ error: 'Episódio não encontrado.' });
@@ -22,8 +22,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Imagens e trilha sonora associadas ao episódio
-router.get('/:id/media', async (req, res) => {
+// Endpoint para imagens e trilha sonora associadas ao episódio
+router.get('/:id/media', async (req: Request, res: Response) => {
   try {
     const media = await getEpisodeMedia(req.params.id);
     if (!media) return res.status(404).json({ error: 'Mídia não encontrada.' });
