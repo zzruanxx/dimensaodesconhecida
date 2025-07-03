@@ -8,5 +8,3 @@ describe('GET /api/serling', () => {
     expect(res.body).toBeDefined();
   });
 });
-  });
-});
