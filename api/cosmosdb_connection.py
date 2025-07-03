@@ -1,4 +1,4 @@
-from azure.cosmos import CosmosClient, PartitionKey
+from azure.cosmos import CosmosClient, PartitionKey, exceptions
 import os
 
 COSMOS_DB_ENDPOINT = os.environ.get("COSMOS_DB_ENDPOINT")
@@ -6,32 +6,38 @@ COSMOS_DB_KEY = os.environ.get("COSMOS_DB_KEY")
 COSMOS_DB_DATABASE = os.environ.get("COSMOS_DB_DATABASE")
 COSMOS_DB_CONTAINER = os.environ.get("COSMOS_DB_CONTAINER")
 
-if not all([COSMOS_DB_ENDPOINT, COSMOS_DB_KEY, COSMOS_DB_DATABASE, COSMOS_DB_CONTAINER]):
-    print(
-        "[AVISO] Uma ou mais variáveis de ambiente do Cosmos DB não estão definidas: "
-        "COSMOS_DB_ENDPOINT, COSMOS_DB_KEY, COSMOS_DB_DATABASE, COSMOS_DB_CONTAINER"
-    )
-    client = None
-    database = None
-    container = None
-else:
-    client = CosmosClient(COSMOS_DB_ENDPOINT, credential=COSMOS_DB_KEY)
-    database = client.create_database_if_not_exists(COSMOS_DB_DATABASE)
-    container = database.create_container_if_not_exists(
-        id=COSMOS_DB_CONTAINER,
-        partition_key=PartitionKey(path="/id"),
-    )
+# Use as variáveis, não valores literais!
+client = CosmosClient(COSMOS_DB_ENDPOINT, credential=COSMOS_DB_KEY)
+database = client.create_database_if_not_exists(id=COSMOS_DB_DATABASE)
+
+def get_container():
+    try:
+        container = database.get_container_client(COSMOS_DB_CONTAINER)
+        container.read()
+    except exceptions.CosmosResourceNotFoundError:
+        container = database.create_container(
+            id=COSMOS_DB_CONTAINER,
+            partition_key=PartitionKey(path="/id"),
+            offer_throughput=400
+        )
+    return database.get_container_client(COSMOS_DB_CONTAINER)
 
 def criar_item(item):
-    return container.create_item(item)
-from .cosmosdb_connection import criar_item
+    container = get_container()
+    return container.create_item(body=item)
 
-def criar_novo_item(request):
-    data = {"id": "item1", "nome": "Teste"}
-    criar_item(data)
-    ...
 def ler_item(item_id, pk):
-    return container.read_item(item_id, partition_key=pk)
+    container = get_container()
+    return container.read_item(item=item_id, partition_key=pk)
 
 def listar_itens():
+    container = get_container()
     return list(container.read_all_items())
+
+def listar_episodios():
+    container = get_container()
+    return list(container.read_all_items())
+
+def criar_episodio(episodio):
+    container = get_container()
+    return container.create_item(body=episodio)
